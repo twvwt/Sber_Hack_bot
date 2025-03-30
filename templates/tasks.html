@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Распределение задач | СберМероприятия</title>
+    <link href="/static/css/sber.css" rel="stylesheet">
+</head>
+<body>
+    <div class="sber-container">
+        <header class="sber-header">
+            <div class="sber-logo">
+                <img src="https://avatars.mds.yandex.net/i?id=07c3194ea6e68a6587a26699fe9ef864e43b9fc9-9211526-images-thumbs&n=13" alt="Сбер">
+                <span>F I E S T A</span>
+            </div>
+        </header>
+        
+        <main class="sber-main">
+            <h1>Распределение задач</h1>
+            
+            <section class="sber-section">
+                <h2>Доступные задачи</h2>
+                <div class="task-list" id="taskList">
+                    {% for task in tasks %}
+                    <div class="task-card">
+                        <h3>{{ task.name }}</h3>
+                        <div class="voters">
+                            {% for voter in task.voters %}
+                            <div class="voter">Участник {{ voter }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            
+            <section class="sber-section">
+                <h2>Назначить задачу</h2>
+                <div class="assign-form">
+                    <select id="taskSelect" class="sber-select">
+                        <option value="">Выберите задачу</option>
+                        {% for task in tasks %}
+                        <option value="{{ task.name }}">{{ task.name }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <select id="userSelect" class="sber-select">
+                        <option value="">Выберите участника</option>
+                        {% for participant in participants %}
+                        <option value="{{ participant }}">Участник {{ participant }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <input type="date" id="deadline" class="sber-input">
+                    
+                    <button onclick="assignTask()" class="sber-button">Назначить</button>
+                </div>
+            </section>
+            
+            <section class="sber-section">
+                <h2>Текущие назначения</h2>
+                <div class="assignments" id="assignments">
+                    {% for assignment in assignments %}
+                    <div class="assignment">
+                        <div>
+                            <h3>{{ assignment.task }}</h3>
+                            <p>Участник {{ assignment.assigned_to }} | Срок: {{ assignment.deadline }}</p>
+                            <p>Статус: {{ assignment.status }}</p>
+                        </div>
+                        <div class="assignment-actions">
+                            {% if assignment.status != "completed" %}
+                            <button onclick="completeTask('{{ assignment.task }}')" class="sber-button small">✓</button>
+                            {% endif %}
+                            <button onclick="deleteTask('{{ assignment.task }}')" class="sber-button small danger">✗</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        async function assignTask() {
+            const task = document.getElementById('taskSelect').value;
+            const userId = document.getElementById('userSelect').value;
+            const deadline = document.getElementById('deadline').value;
+            
+            if (!task || !userId || !deadline) {
+                alert('Заполните все поля');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/assign_task/{{ chat_id }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        task: task,
+                        user_id: userId,
+                        deadline: deadline
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert(result.message || 'Ошибка при назначении задачи');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка при назначении задачи');
+            }
+        }
+        
+        async function completeTask(task) {
+            try {
+                const response = await fetch(`/complete_task/{{ chat_id }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        task: task
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert(result.message || 'Ошибка при завершении задачи');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка при завершении задачи');
+            }
+        }
+        
+        async function deleteTask(task) {
+            if (!confirm('Вы уверены, что хотите удалить эту задачу?')) return;
+            
+            try {
+                const response = await fetch(`/delete_task/{{ chat_id }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        task: task
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert(result.message || 'Ошибка при удалении задачи');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ошибка при удалении задачи');
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('deadline').min = today;
+        });
+    </script>
+</body>
+</html>

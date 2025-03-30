@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Распределение задач | СберМероприятия</title>
+    <style>
+        :root {
+            --sber-green: #21A038;
+            --sber-dark: #1C1C1C;
+            --sber-light: #F5F5F5;
+            --sber-blue: #0085FF;
+            --sber-red: #FF3347;
+            --sber-yellow: #FFD700;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'SBSansText', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: var(--sber-light);
+            color: var(--sber-dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 15px 0;
+            margin-bottom: 30px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo img {
+            height: 40px;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--sber-green);
+        }
+        
+        .event-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .event-title h1 {
+            color: var(--sber-dark);
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .event-title p {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .results-section {
+            background-color: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--sber-green);
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .section-title svg {
+            margin-right: 10px;
+        }
+        
+        .voting-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .result-card {
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--sber-green);
+            transition: transform 0.2s;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-card h3 {
+            color: var(--sber-dark);
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .voters-list {
+            margin-top: 15px;
+        }
+        
+        .voter-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .voter-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--sber-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .voter-name {
+            flex-grow: 1;
+            font-size: 14px;
+        }
+        
+        .task-assign {
+            background-color: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .assign-form {
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--sber-dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--sber-blue);
+        }
+        
+        .btn {
+            background-color: var(--sber-green);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #1a8a2e;
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--sber-dark);
+            border: 1px solid #ddd;
+            margin-right: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .assignments {
+            margin-top: 30px;
+        }
+        
+        .assignment-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--sber-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .assignment-info h4 {
+            color: var(--sber-dark);
+            margin-bottom: 5px;
+        }
+        
+        .assignment-info p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .assignment-actions button {
+            background: none;
+            border: none;
+            color: var(--sber-blue);
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .assignment-actions button:hover {
+            text-decoration: underline;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        .status-pending {
+            background-color: #FFF3E0;
+            color: #E65100;
+        }
+        
+        .status-completed {
+            background-color: #E8F5E9;
+            color: var(--sber-green);
+        }
+        
+        @media (max-width: 768px) {
+            .voting-results {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <img src="https://www.sberbank.com/favicon.ico" alt="Сбер">
+                <span class="logo-text">СберМероприятия</span>
+            </div>
+            <div class="user-info">
+                <span id="current-date"></span>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="event-title">
+            <h1 id="event-name">Свадьба Анны и Михаила</h1>
+            <p id="event-date">15 июля 2023 • Москва • Бюджет: 500 000 ₽</p>
+        </div>
+        
+        <div class="results-section">
+            <div class="section-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="#21A038"/>
+                </svg>
+                Результаты голосования
+            </div>
+            
+            <div class="voting-results" id="voting-results">
+                <!-- Динамически заполняется через JavaScript -->
+            </div>
+        </div>
+        
+        <div class="task-assign">
+            <div class="section-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM13 7H11V13H17V11H13V7Z" fill="#21A038"/>
+                </svg>
+                Распределение задач
+            </div>
+            
+            <div class="assign-form">
+                <div class="form-group">
+                    <label for="task-select">Выберите задачу</label>
+                    <select id="task-select" class="form-control">
+                        <option value="">-- Выберите задачу --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-select">Назначить участника</label>
+                    <select id="user-select" class="form-control">
+                        <option value="">-- Выберите участника --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="deadline">Срок выполнения</label>
+                    <input type="date" id="deadline" class="form-control">
+                </div>
+                
+                <button id="assign-btn" class="btn">Назначить задачу</button>
+            </div>
+            
+            <div class="assignments" id="assignments">
+                <h3 style="margin-bottom: 20px;">Текущие назначения</h3>
+                <!-- Динамически заполняется через JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные мероприятия (в реальном приложении будут приходить с сервера)
+        const eventData = {
+            name: "Свадьба Анны и Михаила",
+            date: "15 июля 2023",
+            location: "Москва",
+            budget: "500 000 ₽",
+            votingResults: {
+                location: [
+                    {
+                        option: "Ресторан 'Золотой дракон'",
+                        voters: [
+                            { id: 1, name: "Анна П." },
+                            { id: 2, name: "Михаил К." },
+                            { id: 3, name: "Елена С." }
+                        ]
+                    },
+                    {
+                        option: "Банкетный зал 'У моря'",
+                        voters: [
+                            { id: 4, name: "Ольга В." },
+                            { id: 5, name: "Дмитрий М." }
+                        ]
+                    }
+                ],
+                products: [
+                    {
+                        option: "Фотограф - Иван Петров",
+                        voters: [
+                            { id: 1, name: "Анна П." },
+                            { id: 3, name: "Елена С." },
+                            { id: 5, name: "Дмитрий М." }
+                        ]
+                    },
+                    {
+                        option: "Торт от кондитерской 'Sweet Dreams'",
+                        voters: [
+                            { id: 2, name: "Михаил К." },
+                            { id: 4, name: "Ольга В." }
+                        ]
+                    },
+                    {
+                        option: "Музыкальный коллектив 'Retro Band'",
+                        voters: [
+                            { id: 1, name: "Анна П." },
+                            { id: 2, name: "Михаил К." }
+                        ]
+                    }
+                ]
+            },
+            participants: [
+                { id: 1, name: "Анна П." },
+                { id: 2, name: "Михаил К." },
+                { id: 3, name: "Елена С." },
+                { id: 4, name: "Ольга В." },
+                { id: 5, name: "Дмитрий М." }
+            ],
+            assignments: [
+                {
+                    task: "Забронировать ресторан",
+                    assignedTo: { id: 1, name: "Анна П." },
+                    deadline: "2023-06-01",
+                    status: "pending"
+                },
+                {
+                    task: "Согласовать меню",
+                    assignedTo: { id: 2, name: "Михаил К." },
+                    deadline: "2023-06-10",
+                    status: "pending"
+                }
+            ]
+        };
+
+        // Установка текущей даты
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+
+        // Заполнение данных мероприятия
+        document.getElementById('event-name').textContent = eventData.name;
+        document.getElementById('event-date').textContent = `${eventData.date} • ${eventData.location} • Бюджет: ${eventData.budget}`;
+
+        // Отображение результатов голосования
+        function renderVotingResults() {
+            const resultsContainer = document.getElementById('voting-results');
+            resultsContainer.innerHTML = '';
+
+            // Места
+            const locationTitle = document.createElement('h3');
+            locationTitle.textContent = 'Место мероприятия';
+            locationTitle.style.gridColumn = '1 / -1';
+            locationTitle.style.margin = '10px 0';
+            resultsContainer.appendChild(locationTitle);
+
+            eventData.votingResults.location.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `
+                    <h3>${item.option}</h3>
+                    <div class="voters-list">
+                        ${item.voters.map(voter => `
+                            <div class="voter-item">
+                                <div class="voter-avatar">${voter.name.charAt(0)}</div>
+                                <div class="voter-name">${voter.name}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                resultsContainer.appendChild(card);
+            });
+
+            // Продукты и услуги
+            const productsTitle = document.createElement('h3');
+            productsTitle.textContent = 'Продукты и услуги';
+            productsTitle.style.gridColumn = '1 / -1';
+            productsTitle.style.margin = '30px 0 10px';
+            resultsContainer.appendChild(productsTitle);
+
+            eventData.votingResults.products.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `
+                    <h3>${item.option}</h3>
+                    <div class="voters-list">
+                        ${item.voters.map(voter => `
+                            <div class="voter-item">
+                                <div class="voter-avatar">${voter.name.charAt(0)}</div>
+                                <div class="voter-name">${voter.name}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                resultsContainer.appendChild(card);
+            });
+        }
+
+        // Заполнение выпадающих списков
+        function initForm() {
+            const taskSelect = document.getElementById('task-select');
+            const userSelect = document.getElementById('user-select');
+
+            // Очищаем списки
+            taskSelect.innerHTML = '<option value="">-- Выберите задачу --</option>';
+            userSelect.innerHTML = '<option value="">-- Выберите участника --</option>';
+
+            // Добавляем задачи
+            const allTasks = [
+                'Забронировать ресторан',
+                'Согласовать меню',
+                'Найти фотографа',
+                'Заказать торт',
+                'Организовать музыку',
+                'Разослать приглашения',
+                'Подготовить декор'
+            ];
+
+            allTasks.forEach(task => {
+                const option = document.createElement('option');
+                option.value = task;
+                option.textContent = task;
+                taskSelect.appendChild(option);
+            });
+
+            // Добавляем участников
+            eventData.participants.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.name;
+                userSelect.appendChild(option);
+            });
+        }
+
+        // Отображение назначенных задач
+        function renderAssignments() {
+            const assignmentsContainer = document.getElementById('assignments');
+            assignmentsContainer.innerHTML = '<h3 style="margin-bottom: 20px;">Текущие назначения</h3>';
+
+            if (eventData.assignments.length === 0) {
+                assignmentsContainer.innerHTML += '<p>Нет назначенных задач</p>';
+                return;
+            }
+
+            eventData.assignments.forEach(assignment => {
+                const card = document.createElement('div');
+                card.className = 'assignment-card';
+                card.innerHTML = `
+                    <div class="assignment-info">
+                        <h4>${assignment.task}</h4>
+                        <p>Ответственный: ${assignment.assignedTo.name} • Срок: ${new Date(assignment.deadline).toLocaleDateString('ru-RU')}
+                            <span class="status-badge ${assignment.status === 'pending' ? 'status-pending' : 'status-completed'}">
+                                ${assignment.status === 'pending' ? 'В работе' : 'Выполнено'}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="assignment-actions">
+                        <button onclick="completeAssignment('${assignment.task}')">Завершить</button>
+                        <button onclick="deleteAssignment('${assignment.task}')">Удалить</button>
+                    </div>
+                `;
+                assignmentsContainer.appendChild(card);
+            });
+        }
+
+        // Назначение новой задачи
+        document.getElementById('assign-btn').addEventListener('click', function() {
+            const taskSelect = document.getElementById('task-select');
+            const userSelect = document.getElementById('user-select');
+            const deadlineInput = document.getElementById('deadline');
+
+            if (!taskSelect.value || !userSelect.value || !deadlineInput.value) {
+                alert('Пожалуйста, заполните все поля');
+                return;
+            }
+
+            const selectedUser = eventData.participants.find(u => u.id == userSelect.value);
+
+            const newAssignment = {
+                task: taskSelect.value,
+                assignedTo: selectedUser,
+                deadline: deadlineInput.value,
+                status: 'pending'
+            };
+
+            eventData.assignments.push(newAssignment);
+            renderAssignments();
+
+            // Очищаем форму
+            taskSelect.value = '';
+            userSelect.value = '';
+            deadlineInput.value = '';
+        });
+
+        // Завершение задачи
+        window.completeAssignment = function(task) {
+            const assignment = eventData.assignments.find(a => a.task === task);
+            if (assignment) {
+                assignment.status = 'completed';
+                renderAssignments();
+            }
+        };
+
+        // Удаление задачи
+        window.deleteAssignment = function(task) {
+            if (confirm('Вы уверены, что хотите удалить эту задачу?')) {
+                eventData.assignments = eventData.assignments.filter(a => a.task !== task);
+                renderAssignments();
+            }
+        };
+
+        // Инициализация страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            renderVotingResults();
+            initForm();
+            renderAssignments();
+            
+            // Устанавливаем минимальную дату как сегодня
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('deadline').min = today;
+        });
+    </script>
+</body>
+</html>
