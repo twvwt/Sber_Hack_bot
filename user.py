@@ -353,8 +353,8 @@ async def process_finish(callback: CallbackQuery, state: FSMContext):
             # Инициализируем Pyrogram клиент (укажите свои api_id и api_hash)
             pyro_app = Client(
                 "my_session",
-                api_id = 24373411,
-                api_hash = '195b8f73d79491b07e658b1ca6dae0c9'
+                api_id = 24343324, #нНапишите действующий api_id и api_hash
+                api_hash = '195b8f73d7949fddffdbbfgbfgbfggfe0c9'
             )
             
             async with pyro_app:
@@ -721,7 +721,7 @@ async def finish_voting(callback: types.CallbackQuery, bot: Bot):
         await callback.answer("❌ Ошибка при завершении голосования", show_alert=True)
 
 async def run_bot():
-    bot = Bot(token="7610916683:AAFFyrf6TAH7qL0kPvjUhmXlv4Zl6YdakcU")
+    bot = Bot(token="234435683:AAFFyrf6TdfgdgdgdgdfdfgfbfgcU") #Замените на свой токен-бота
     dp = Dispatcher()
     dp.include_router(router)
     await dp.start_polling(bot)
